@@ -1,0 +1,9 @@
+# Cache de Python
+**/__pycache__/
+*.pyc
+
+# Bases de datos locales
+*.db
+
+# Archivos comprimidos o temporales
+*.zip

@@ -14,6 +14,16 @@ EMPRESA   = "TESLA SRL"
 LOGO_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                          '..', 'assets', 'logo.png')
 
+# Iconos del técnico
+ICON_GMAIL = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                          '..', 'assets', 'gmail.png')
+ICON_TELEFONO = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                              '..', 'assets', 'telefono.png')
+ICON_WHATSAPP = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                              '..', 'assets', 'whatsapp.png')
+ICON_UBICACION = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                               '..', 'assets', 'ubicacion.png')
+
 SERVICIOS_TEXT = (
     "<b>ASESORÍA Y SUMINISTRO DE:</b><br/>"
     "— MATERIALES Y EQUIPOS ELÉCTRICOS PARA MEDIA TENSIÓN (MT.) Y (BT.).<br/>"
@@ -54,6 +64,14 @@ def _estilos():
         'cell_b':    ParagraphStyle('cellb',  fontSize=7.5,fontName='Helvetica-Bold', leading=9),
         'footer':    ParagraphStyle('foot',   fontSize=7,  fontName='Helvetica',
                                     alignment=TA_CENTER, textColor=colors.grey),
+        'tecnico_nombre': ParagraphStyle('tecnico_nombre', fontSize=10, fontName='Helvetica-Bold',
+                                        textColor=AZUL, alignment=TA_CENTER, spaceAfter=6),
+        'tecnico_label': ParagraphStyle('tecnico_label', fontSize=7.5, fontName='Helvetica-Bold',
+                                        textColor=AZUL, alignment=TA_LEFT),
+        'tecnico_valor': ParagraphStyle('tecnico_valor', fontSize=8.5, fontName='Helvetica',
+                                 textColor=colors.HexColor('#333333'), alignment=TA_CENTER),
+        'tecnico_valor_centrado': ParagraphStyle('tecnico_valor_centrado', fontSize=9, fontName='Helvetica',
+                                        textColor=colors.black, alignment=TA_CENTER),
     }
 
 # ── Bloque encabezado (logo + servicios + título doc) ───────────
@@ -216,6 +234,63 @@ def _bloque_totales(s, total_sin_desc, descuento, iva, total_final):
     ]))
     return t
 
+# ── Bloque de datos del técnico con iconos y textos ──────────────
+def _bloque_tecnico(story, s):
+    """Agrega los datos del técnico con iconos pegados al texto"""
+    
+    story.append(Spacer(1, 8))
+    
+    # Función para cargar iconos
+    def get_icon(path, emoji):
+        if os.path.exists(path):
+            try:
+                return Image(path, width=0.45*cm, height=0.45*cm)
+            except:
+                return emoji
+        return emoji
+    
+    # Preparar iconos
+    icon_tel = get_icon(ICON_TELEFONO, "📞")
+    icon_wsp = get_icon(ICON_WHATSAPP, "📱")
+    icon_email = get_icon(ICON_GMAIL, "✉️")
+    icon_dir = get_icon(ICON_UBICACION, "📍")
+    
+    # Línea de separación
+    story.append(HRFlowable(width="80%", thickness=0.5, color=GRIS_L, hAlign='CENTER'))
+    story.append(Spacer(1, 10))
+    
+    # Título del técnico centrado
+    story.append(Paragraph("<b>T. S.: EDGAR LÓPEZ A.</b>", s['tecnico_nombre']))
+    story.append(Spacer(1, 12))
+    
+    # Crear una sola tabla centrada con todas las filas (icono + texto juntos)
+    data_tecnico = [
+        # Teléfono
+        [icon_tel, Paragraph("Tel. (+591) 71571572", s['tecnico_valor'])],
+        # WhatsApp
+        [icon_wsp, Paragraph("Whatsapp: (+591) 71571572", s['tecnico_valor'])],
+        # Email
+        [icon_email, Paragraph("Email: edgarlopezala@gmail.com", s['tecnico_valor'])],
+        # Dirección
+        [icon_dir, Paragraph("Dir.: ZONA SANTIAGO II C/7 N° 186 - LA PAZ/EL ALTO", s['tecnico_valor'])],
+    ]
+    
+    # Tabla con dos columnas: icono (pequeño) + texto (resto del ancho)
+    t_tecnico = Table(data_tecnico, colWidths=[0.7*cm, 17*cm])
+    t_tecnico.setStyle(TableStyle([
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('ALIGN', (50,0), (0,-1), 'CENTER'),   # Iconos centrados
+        ('ALIGN', (1,0), (1,-1), 'CENTER'),   # Texto centrado
+        ('TOPPADDING', (0,0), (-1,-1), 4),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 4),
+        ('LEFTPADDING', (0,0), (-1,-1), 0),
+        ('RIGHTPADDING', (0,0), (-1,-1), 0),
+    ]))
+    
+    story.append(t_tecnico)
+    story.append(Spacer(1, 8))
+    story.append(HRFlowable(width="80%", thickness=0.5, color=GRIS_L, hAlign='CENTER'))
+
 # ── Callback número de página ────────────────────────────────────
 def _add_page_number(canvas, doc):
     canvas.saveState()
@@ -269,7 +344,7 @@ def exportar_venta_pdf(venta, detalles, cliente_nombre, usuario_nombre,
     fecha_doc = (venta.get('fecha','')[:10] or
                  datetime.date.today().isoformat())
     _datos_cliente(story, s, cliente_nombre, cliente_direccion,
-                   cliente_telefono, venta.get('ci_nit', ''), fecha_doc)
+                   cliente_telefono, cliente_ci_nit, fecha_doc)
 
     # Referencia
     story.append(Paragraph(
@@ -285,8 +360,8 @@ def exportar_venta_pdf(venta, detalles, cliente_nombre, usuario_nombre,
             'unidad':      d.get('unidad_medida',''),
             'descripcion': d['descripcion'],
             'marca':       d.get('marca',''),
-            'precio_unit': d.get('precio_venta', 0),           # sin descuento
-            'precio_total':d['cantidad'] * d.get('precio_venta', 0),  # sin desc
+            'precio_unit': d.get('precio_venta', 0),
+            'precio_total':d['cantidad'] * d.get('precio_venta', 0),
         })
     story.append(_tabla_detalle(s, filas))
     story.append(Spacer(1, 8))
@@ -302,6 +377,9 @@ def exportar_venta_pdf(venta, detalles, cliente_nombre, usuario_nombre,
     story.append(HRFlowable(width="100%", thickness=0.5, color=GRIS_L))
     story.append(Spacer(1, 4))
     story.append(Paragraph("Gracias por su preferencia.", s['footer']))
+    
+    # Agregar bloque del técnico
+    _bloque_tecnico(story, s)
 
     doc.build(story, onFirstPage=_add_page_number, onLaterPages=_add_page_number)
     return filepath
@@ -334,7 +412,7 @@ def exportar_cotizacion_pdf(cotizacion, detalles, cliente_nombre,
     fecha_doc = (cotizacion.get('fecha','')[:10] or
                  datetime.date.today().isoformat())
     _datos_cliente(story, s, cliente_nombre, cliente_direccion,
-                   cliente_telefono, fecha_doc, cliente_ci_nit)
+                   cliente_telefono, cliente_ci_nit, fecha_doc)
 
     # Referencia
     story.append(Paragraph(
@@ -363,7 +441,6 @@ def exportar_cotizacion_pdf(cotizacion, detalles, cliente_nombre,
     descuento = cotizacion.get('descuento_total', 0)
     total_fin = cotizacion.get('total', 0)
 
-    # Si subtotal no está guardado, calcularlo de los detalles
     if total_sin == total_fin and descuento == 0:
         total_sin = sum(d['cantidad'] * (d.get('precio_venta_original') or d.get('precio',0))
                        for d in detalles)
@@ -377,6 +454,9 @@ def exportar_cotizacion_pdf(cotizacion, detalles, cliente_nombre,
     story.append(Paragraph(
         "⚠  La presente cotización tiene una validez de <b>2 días</b> a partir de la fecha de emisión.",
         s['footer']))
+    
+    # Agregar bloque del técnico
+    _bloque_tecnico(story, s)
 
     doc.build(story, onFirstPage=_add_page_number, onLaterPages=_add_page_number)
     return filepath

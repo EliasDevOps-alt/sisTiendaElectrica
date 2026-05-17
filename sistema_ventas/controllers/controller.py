@@ -234,7 +234,7 @@ def registrar_entrada_stock(detalles):
     """Solo para VENDEDOR: suma cantidad al stock SIN tocar precios ni caja."""
     conn = get_connection()
     # Deshabilitar el trigger para no afectar precios
-    conn.execute("DROP TRIGGER IF EXISTS actualizar_stock_compra_temp")
+    conn.execute("DROP TRIGGER IF EXISTS actualizar_stock_compra")
     # Registrar en historial de compras con costo 0
     cursor = conn.execute(
         "INSERT INTO compras (proveedor_id, total) VALUES (NULL, 0)")

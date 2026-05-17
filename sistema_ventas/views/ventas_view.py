@@ -520,13 +520,18 @@ class NuevaVentaPanel(tk.Frame):
                   command=self._aplicar_desc_global).pack(side=LEFT, padx=(4,0))
         self.desc_global_entry.bind("<Return>", lambda e: self._aplicar_desc_global())
 
+
+        # Contenedor para CarritoWidget con altura mínima
+        cart_container = tk.Frame(right, bg='white')
+        cart_container.pack(fill=BOTH, expand=True, pady=(6,0))
+
         # CarritoWidget — tabla personalizada con descripción completa y multi-línea
-        self.cart_widget = CarritoWidget(right,
+        self.cart_widget = CarritoWidget(cart_container,
                                           on_doble_clic=self._editar_item_carrito)
         self.cart_widget.pack(fill=BOTH, expand=True)
 
         btn_row_cart = tk.Frame(right, bg='white')
-        btn_row_cart.pack(anchor='w', pady=(5,0))
+        btn_row_cart.pack(anchor='w', pady=(2,0))
         tb.Button(btn_row_cart, text="🗑️ Quitar seleccionado",
                   bootstyle="danger-outline",
                   command=self._quitar_item).pack(side=LEFT, padx=(0,6))
@@ -539,27 +544,27 @@ class NuevaVentaPanel(tk.Frame):
                  font=("Arial", 7), bg='white', fg='#aaa').pack(side=LEFT, padx=4)
 
         # Totales
-        tk.Frame(right, bg='#eee', height=1).pack(fill=X, pady=4)
+        tk.Frame(right, bg='#eee', height=1).pack(fill=X, pady=2)
         tot_frame = tk.Frame(right, bg='white')
-        tot_frame.pack(fill=X)
+        tot_frame.pack(fill=X, padx=0, pady=0)
 
         self.lbl_sin_desc  = tk.Label(tot_frame, text="Total s/descuento: Bs. 0.00",
-                                       font=("Arial", 9), bg='white', fg='#777')
-        self.lbl_sin_desc.pack(anchor='e')
+                                       font=("Arial", 8), bg='white', fg='#777')
+        self.lbl_sin_desc.pack(anchor='e', pady=1)
         self.lbl_iva       = tk.Label(tot_frame, text="IVA (13%):  Bs. 0.00",
-                                       font=("Arial", 9), bg='white', fg='#777')
-        self.lbl_iva.pack(anchor='e')
+                                       font=("Arial", 8), bg='white', fg='#777')
+        self.lbl_iva.pack(anchor='e', pady=1)
         self.lbl_descuento = tk.Label(tot_frame, text="Descuento ahorrado: Bs. 0.00",
-                                       font=("Arial", 9, "bold"), bg='white', fg='#e65100')
-        self.lbl_descuento.pack(anchor='e')
+                                       font=("Arial", 8, "bold"), bg='white', fg='#e65100')
+        self.lbl_descuento.pack(anchor='e', pady=1)
         tk.Frame(right, bg='#ccc', height=1).pack(fill=X)
         self.lbl_total     = tk.Label(tot_frame, text="TOTAL: Bs. 0.00",
                                        font=("Arial", 11, "bold"), bg='white', fg=HEADER_BG)
-        self.lbl_total.pack(anchor='e', pady=(4,0))
+        self.lbl_total.pack(anchor='e', pady=(2,0))
 
         # Botones finales
         btn_row = tk.Frame(right, bg='white')
-        btn_row.pack(fill=X, pady=(6,0))
+        btn_row.pack(fill=X, pady=(3,0))
         tb.Button(btn_row, text="✅ REGISTRAR VENTA", bootstyle="dark",
                   command=self._registrar).pack(side=LEFT, ipadx=6, ipady=5)
         tb.Button(btn_row, text="🗑️ Limpiar Todo", bootstyle="danger-outline",
