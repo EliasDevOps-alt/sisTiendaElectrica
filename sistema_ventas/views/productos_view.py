@@ -38,23 +38,24 @@ class ProductosView(tk.Frame):
                   command=self._nuevo).pack(side=RIGHT, padx=5)
 
         # Columnas — precio_compra y % solo para ADMIN
+        # Vendedor NO ve Desc.Máximo
         if self.es_admin:
-            cols = ['Código','Descripción','Categoría','Marca','UM',
+            cols = ['Cód.Prod','Cód.Tienda','Descripción','Categoría','Marca','UM',
                     'Stock','P.Compra','%Venta','P.Venta','Desc.Máx','Estado']
-            self._col_keys = ['codigo_tienda','descripcion','categoria','marca',
+            self._col_keys = ['codigo_proveedor','codigo_tienda','descripcion','categoria','marca',
                               'unidad_medida','stock','_pc','_pv_pct',
                               '_pv','_dm','_activo']
         else:
-            cols = ['Código','Descripción','Categoría','Marca','UM',
-                    'Stock','P.Venta','Desc.Máx','Estado']
-            self._col_keys = ['codigo_tienda','descripcion','categoria','marca',
-                              'unidad_medida','stock','_pv','_dm','_activo']
+            cols = ['Cód.Prod','Cód.Tienda','Descripción','Categoría','Marca','UM',
+                    'Stock','P.Venta','Estado']
+            self._col_keys = ['codigo_proveedor','codigo_tienda','descripcion','categoria','marca',
+                              'unidad_medida','stock','_pv','_activo']
 
         card = make_card(self)
         frame_tree, self.tree = make_treeview(card, cols)
         frame_tree.pack(fill=BOTH, expand=True, padx=10, pady=8)
 
-        w = {'Código':75,'Descripción':200,'Categoría':95,'Marca':85,'UM':55,
+        w = {'Cód.Prod':75,'Cód.Tienda':75,'Descripción':200,'Categoría':95,'Marca':85,'UM':55,
              'Stock':55,'P.Compra':80,'%Venta':60,'P.Venta':80,
              'Desc.Máx':70,'Estado':65}
         for col in cols:
@@ -133,8 +134,8 @@ class ProductoDialog(tk.Toplevel):
         self.grab_set()
         self.configure(bg='white')
 
-        # Altura según rol: admin ve más campos
-        h = 520 if es_admin else 420
+        # Altura según rol: admin ve más campos, vendedor ahora también puede editar stock
+        h = 520 if es_admin else 470
         w = 560
         sw, sh = self.winfo_screenwidth(), self.winfo_screenheight()
         self.geometry(f"{w}x{h}+{(sw-w)//2}+{(sh-h)//2}")
@@ -180,10 +181,11 @@ class ProductoDialog(tk.Toplevel):
             ('Stock inicial',  'stock',            4, 1, False, None),
         ]
 
-        # Campos para VENDEDOR (solo precio venta y desc máx de referencia, sin editar)
+        # Campos para VENDEDOR (precio venta, descuento máximo y stock)
         vendedor_fields = [
             ('Precio Venta',   'precio_venta',    0, 1, False, None),
             ('Desc. Máximo %', 'descuento_maximo',1, 1, False, None),
+            ('Stock inicial',  'stock',           2, 1, False, None),
         ]
 
         all_fields = comunes + (admin_fields if self.es_admin else vendedor_fields)
@@ -197,6 +199,10 @@ class ProductoDialog(tk.Toplevel):
                            is_combo=is_combo, values=vals,
                            textvariable=self._vars[key], width=18,
                            state='readonly' if (is_combo or readonly) else 'normal')
+        
+        # Agregar campo stock para vendedor (editable)
+        if not self.es_admin and 'stock' not in self._vars:
+            self._vars['stock'] = tk.StringVar()
 
         # Defaults
         self._vars['unidad_medida'].set('UNIDAD')
@@ -211,16 +217,17 @@ class ProductoDialog(tk.Toplevel):
         else:
             self._vars['precio_venta'].set('0')
             self._vars['descuento_maximo'].set('0')
+            self._vars['stock'].set('0')
 
         if cat_names: self._vars['categoria_id'].set(cat_names[0])
         if mar_names: self._vars['marca_id'].set(mar_names[0])
 
         # Si es vendedor: aviso
         if not self.es_admin:
-            tk.Label(form, text="ℹ️  Precio y descuento son asignados por Administración.",
+            tk.Label(form, text="ℹ️  Precio y descuento son asignados por Administración. Tú puedes gestionar el stock.",
                      font=("Arial", 8), bg='white', fg='#888',
                      wraplength=340, justify='left').grid(
-                     row=2, column=2, columnspan=2, sticky='w', padx=8, pady=4)
+                     row=3, column=2, columnspan=2, sticky='w', padx=8, pady=4)
 
         # Botones
         btn_frame = tk.Frame(self, bg='white', pady=8)
@@ -245,10 +252,10 @@ class ProductoDialog(tk.Toplevel):
         self._vars['unidad_medida'].set(p.get('unidad_medida') or 'UNIDAD')
         self._vars['precio_venta'].set(str(p.get('precio_venta', 0)))
         self._vars['descuento_maximo'].set(str(p.get('descuento_maximo', 0)))
+        self._vars['stock'].set(str(p.get('stock', 0)))  # Stock para admin y vendedor
         if self.es_admin:
             self._vars['precio_compra'].set(str(p.get('precio_compra', 0)))
             self._vars['porcentaje_venta'].set(str(p.get('porcentaje_venta', 0)))
-            self._vars['stock'].set(str(p.get('stock', 0)))
         for c in self._categorias:
             if c['id'] == p.get('categoria_id'):
                 self._vars['categoria_id'].set(c['nombre']); break
@@ -270,7 +277,7 @@ class ProductoDialog(tk.Toplevel):
             porcentaje     = float(self._vars.get('porcentaje_venta',
                                    tk.StringVar(value='0')).get()
                                    if self.es_admin else 0)
-            stock          = int(self._vars['stock'].get()) if self.es_admin else 0
+            stock          = int(self._vars['stock'].get())  # Stock para admin y vendedor
         except ValueError:
             messagebox.showwarning("Error", "Los campos numéricos deben ser válidos",
                                    parent=self); return
