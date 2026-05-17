@@ -55,7 +55,7 @@ class ProductosView(tk.Frame):
         frame_tree, self.tree = make_treeview(card, cols)
         frame_tree.pack(fill=BOTH, expand=True, padx=10, pady=8)
 
-        w = {'Cód.Prod':75,'Cód.Tienda':75,'Descripción':200,'Categoría':95,'Marca':85,'UM':55,
+        w = {'Cód.Prod':10,'Cód.Tienda':75,'Descripción':500,'Categoría':95,'Marca':85,'UM':55,
              'Stock':55,'P.Compra':80,'%Venta':60,'P.Venta':80,
              'Desc.Máx':70,'Estado':65}
         for col in cols:
