@@ -1,0 +1,25 @@
+# Caché de Python (Archivos temporales)
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Entornos virtuales
+venv/
+venv_build/
+env/
+ENV/
+
+# Archivos pesados de PyInstaller (Compilación)
+build/
+dist/
+*.spec
+
+# Bases de datos locales (Para que no se sobrescriba tu info real en GitHub)
+*.db
+*.sqlite3
+
+# Archivos comprimidos o respaldos sueltos
+*.zip
+*.rar
+*.tar.gz

@@ -10,9 +10,14 @@ from reportlab.platypus import KeepTogether
 import os, datetime
 
 # ── Configuración de empresa ────────────────────────────────────
-EMPRESA   = "TESLA SRL"
-LOGO_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                         '..', 'assets', 'logo.png')
+EMPRESA   = "Lopez electric SRL"
+def _get_base_path():
+    import sys
+    if getattr(sys, 'frozen', False):
+        return sys._MEIPASS        # dentro del .exe
+    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+LOGO_PATH = os.path.join(_get_base_path(), 'assets', 'logo.png')
 
 # Iconos del técnico
 ICON_GMAIL = os.path.join(os.path.dirname(os.path.abspath(__file__)),
