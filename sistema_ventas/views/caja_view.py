@@ -132,12 +132,12 @@ class InventarioView(tk.Frame):
         tb.Button(toolbar, text="⚠️ Stock Bajo", bootstyle="warning-outline", command=self._show_stock_bajo).pack(side=LEFT, padx=5)
 
         card = make_card(self)
-        cols = ['Código', 'Descripción', 'Stock', 'P.Compra', 'P.Venta', 'Val.Inventario', 'Gan.Unit.', 'Gan.Total']
-        self._keys = ['codigo_tienda', 'descripcion', 'stock', 'precio_compra', 'precio_venta',
-                      'valor_inventario', 'ganancia_unitaria', 'ganancia_total']
+        cols = ['#','Código','Descripción','Stock','P.Compra','P.Venta','Val.Inventario','Gan.Unit.','Gan.Total']
+        self._keys = ['_num','codigo_tienda','descripcion','stock','precio_compra','precio_venta',
+                      'valor_inventario','ganancia_unitaria','ganancia_total']
         frame_tree, self.tree = make_treeview(card, cols, height=18)
         frame_tree.pack(fill=BOTH, expand=True, padx=10, pady=10)
-        widths = {'Código': 80, 'Descripción': 200, 'Stock': 60, 'P.Compra': 90, 'P.Venta': 90,
+        widths = {'#': 40, 'Código': 80, 'Descripción': 200, 'Stock': 60, 'P.Compra': 90, 'P.Venta': 90,
                   'Val.Inventario': 110, 'Gan.Unit.': 90, 'Gan.Total': 100}
         for col in cols:
             self.tree.heading(col, text=col, command=lambda c=col: None)
@@ -146,6 +146,10 @@ class InventarioView(tk.Frame):
 
     def _load(self):
         data = get_valor_inventario()
+        
+        # 📍 ORDENAR POR CÓDIGO DE TIENDA
+        data.sort(key=lambda r: r.get('codigo_tienda', ''))
+        
         # Stats
         for w in self.stats_frame.winfo_children(): w.destroy()
         total_inv = sum(r['valor_inventario'] for r in data)
@@ -156,8 +160,10 @@ class InventarioView(tk.Frame):
         stat_card(self.stats_frame, "GANANCIA POTENCIAL", f"Bs. {total_gan:,.2f}", '#4CAF50', '📈').pack(side=LEFT, fill=BOTH, expand=True)
 
         rows = []
-        for r in data:
+        # 📍 AGREGAR NUMERACIÓN SECUENCIAL (1, 2, 3...)
+        for idx, r in enumerate(data, 1):
             row = dict(r)
+            row['_num'] = str(idx)  # Número secuencial
             row['precio_compra'] = f"Bs.{r['precio_compra']:.2f}"
             row['precio_venta'] = f"Bs.{r['precio_venta']:.2f}"
             row['valor_inventario'] = f"Bs.{r['valor_inventario']:.2f}"

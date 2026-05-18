@@ -39,23 +39,24 @@ class ProductosView(tk.Frame):
 
         # Columnas — precio_compra y % solo para ADMIN
         # Vendedor NO ve Desc.Máximo
+        # Se agrega columna '#' para numeración ordenada por código de tienda
         if self.es_admin:
-            cols = ['Cód.Prod','Cód.Tienda','Descripción','Categoría','Marca','UM',
+            cols = ['#','Cód.Prod','Cód.Tienda','Descripción','Categoría','Marca','UM',
                     'Stock','P.Compra','%Venta','P.Venta','Desc.Máx','Estado']
-            self._col_keys = ['codigo_proveedor','codigo_tienda','descripcion','categoria','marca',
+            self._col_keys = ['_num','codigo_proveedor','codigo_tienda','descripcion','categoria','marca',
                               'unidad_medida','stock','_pc','_pv_pct',
                               '_pv','_dm','_activo']
         else:
-            cols = ['Cód.Prod','Cód.Tienda','Descripción','Categoría','Marca','UM',
+            cols = ['#','Cód.Prod','Cód.Tienda','Descripción','Categoría','Marca','UM',
                     'Stock','P.Venta','Estado']
-            self._col_keys = ['codigo_proveedor','codigo_tienda','descripcion','categoria','marca',
+            self._col_keys = ['_num','codigo_proveedor','codigo_tienda','descripcion','categoria','marca',
                               'unidad_medida','stock','_pv','_activo']
 
         card = make_card(self)
         frame_tree, self.tree = make_treeview(card, cols)
         frame_tree.pack(fill=BOTH, expand=True, padx=10, pady=8)
 
-        w = {'Cód.Prod':10,'Cód.Tienda':75,'Descripción':500,'Categoría':95,'Marca':85,'UM':55,
+        w = {'#':40,'Cód.Prod':70,'Cód.Tienda':75,'Descripción':500,'Categoría':95,'Marca':85,'UM':55,
              'Stock':55,'P.Compra':80,'%Venta':60,'P.Venta':80,
              'Desc.Máx':70,'Estado':65}
         for col in cols:
@@ -84,9 +85,15 @@ class ProductosView(tk.Frame):
 
         self.productos = get_productos(solo_activos=False, busqueda=busq,
                                        categoria_id=cat_id)
+        
+        # 📍 ORDENAR PRODUCTOS POR CÓDIGO DE TIENDA
+        self.productos.sort(key=lambda p: p.get('codigo_tienda', ''))
+        
         rows = []
-        for p in self.productos:
+        # 📍 AGREGAR NUMERACIÓN SECUENCIAL (1, 2, 3...)
+        for idx, p in enumerate(self.productos, 1):
             r = dict(p)
+            r['_num']    = str(idx)  # Número secuencial
             r['_activo'] = "✅ Activo" if p['activo'] else "❌ Inactivo"
             r['_pv']     = f"Bs.{p['precio_venta']:.2f}"
             r['_dm']     = f"{p['descuento_maximo']:.1f}%"
