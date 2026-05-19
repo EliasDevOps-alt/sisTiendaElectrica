@@ -331,7 +331,10 @@ def exportar_venta_pdf(venta, detalles, cliente_nombre, usuario_nombre,
                      datetime.date.today().isoformat()).replace('-','')
         nombre_f  = (cliente_nombre or 'cliente').replace(' ','_')
         nombre_arc= f"venta_{nombre_f}_{fecha_str}_{venta['id']:04d}.pdf"
-        filepath  = os.path.join(os.path.expanduser("~"), "Desktop", nombre_arc)
+        pdf_dir = r"C:\Users\elias\SIS_PDF"
+        if not os.path.exists(pdf_dir):
+            os.makedirs(pdf_dir)
+        filepath  = os.path.join(pdf_dir, nombre_arc)
 
     doc = _DocConPaginas(filepath, pagesize=A4,
                          topMargin=1.5*cm, bottomMargin=1.8*cm,
