@@ -331,10 +331,12 @@ def exportar_venta_pdf(venta, detalles, cliente_nombre, usuario_nombre,
                      datetime.date.today().isoformat()).replace('-','')
         nombre_f  = (cliente_nombre or 'cliente').replace(' ','_')
         nombre_arc= f"venta_{nombre_f}_{fecha_str}_{venta['id']:04d}.pdf"
-        pdf_dir = r"C:\Users\elias\SIS_PDF"
-        if not os.path.exists(pdf_dir):
-            os.makedirs(pdf_dir)
-        filepath  = os.path.join(pdf_dir, nombre_arc)
+        filepath  = os.path.join(os.path.expanduser("~"), "Desktop", nombre_arc)
+        
+        # pdf_dir = r"C:\Users\elias\SIS_PDF"
+        # if not os.path.exists(pdf_dir):
+        #     os.makedirs(pdf_dir)
+        # filepath  = os.path.join(pdf_dir, nombre_arc)
 
     doc = _DocConPaginas(filepath, pagesize=A4,
                          topMargin=1.5*cm, bottomMargin=1.8*cm,
@@ -352,7 +354,7 @@ def exportar_venta_pdf(venta, detalles, cliente_nombre, usuario_nombre,
     fecha_doc = (venta.get('fecha','')[:10] or
                  datetime.date.today().isoformat())
     _datos_cliente(story, s, cliente_nombre, cliente_direccion,
-                   cliente_telefono, cliente_ci_nit, fecha_doc)
+                   cliente_telefono, venta.get('ci_nit', ''), fecha_doc)
 
     # Referencia
     story.append(Paragraph(
@@ -404,11 +406,13 @@ def exportar_cotizacion_pdf(cotizacion, detalles, cliente_nombre,
                      datetime.date.today().isoformat()).replace('-','')
         nombre_f  = (cliente_nombre or 'cliente').replace(' ','_')
         nombre_arc= f"cotizacion_{nombre_f}_{fecha_str}_{cotizacion['id']:04d}.pdf"
-        # 📂 Guardar en carpeta especificada
-        pdf_dir = r"C:\Users\elias\SIS_PDF"
-        if not os.path.exists(pdf_dir):
-            os.makedirs(pdf_dir)
-        filepath  = os.path.join(pdf_dir, nombre_arc)
+        filepath  = os.path.join(os.path.expanduser("~"), "Desktop", nombre_arc)
+        
+        # # 📂 Guardar en carpeta especificada
+        # pdf_dir = r"C:\Users\elias\SIS_PDF"
+        # if not os.path.exists(pdf_dir):
+        #     os.makedirs(pdf_dir)
+        # filepath  = os.path.join(pdf_dir, nombre_arc)
 
     doc = _DocConPaginas(filepath, pagesize=A4,
                          topMargin=1.5*cm, bottomMargin=1.8*cm,
@@ -424,7 +428,7 @@ def exportar_cotizacion_pdf(cotizacion, detalles, cliente_nombre,
     fecha_doc = (cotizacion.get('fecha','')[:10] or
                  datetime.date.today().isoformat())
     _datos_cliente(story, s, cliente_nombre, cliente_direccion,
-                   cliente_telefono, cliente_ci_nit, fecha_doc)
+                   cliente_telefono, fecha_doc, cliente_ci_nit)
 
     # Referencia
     story.append(Paragraph(
