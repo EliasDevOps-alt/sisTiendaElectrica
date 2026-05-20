@@ -156,7 +156,7 @@ def _editar_item_dialog(parent, item, callback):
     top.resizable(False, False)
     top.grab_set()
     top.configure(bg='white')
-    w, h = 460, 400
+    w, h = 500, 500
     sw, sh = top.winfo_screenwidth(), top.winfo_screenheight()
     top.geometry(f"{w}x{h}+{(sw-w)//2}+{(sh-h)//2}")
 
