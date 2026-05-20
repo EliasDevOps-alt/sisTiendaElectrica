@@ -354,7 +354,7 @@ def exportar_venta_pdf(venta, detalles, cliente_nombre, usuario_nombre,
     fecha_doc = (venta.get('fecha','')[:10] or
                  datetime.date.today().isoformat())
     _datos_cliente(story, s, cliente_nombre, cliente_direccion,
-                   cliente_telefono, venta.get('ci_nit', ''), fecha_doc)
+                   cliente_telefono, fecha_doc, cliente_ci_nit)
 
     # Referencia
     story.append(Paragraph(
